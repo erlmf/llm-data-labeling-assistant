@@ -1,23 +1,43 @@
 import google.generativeai as genai
+import os
 
-# 1) Ask API key from user (same key as in Streamlit)
-api_key = input("Enter your Gemini API key: ").strip()
-if not api_key:
-    print("No API key provided. Exiting.")
-    exit()
+genai.configure(api_key=os.getenv("***REMOVED*** "))
 
-# 2) Configure client
-genai.configure(api_key=api_key)
+MODELS_TO_TEST = [
+    "gemini-2.5-pro",
+    "gemini-2.5-flash",
+    "gemini-flash-latest",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+]
 
-# 3) List models
-print("Listing available models that support generateContent:\n")
-models = genai.list_models()
+def can_use(model_name: str) -> bool:
+    try:
+        model = genai.GenerativeModel(model_name)
+        model.generate_content(
+            "ping",
+            generation_config=genai.types.GenerationConfig(max_output_tokens=1)
+        )
+        return True
+    except Exception as e:
+        msg = str(e).lower()
+        if "quota" in msg or "429" in msg:
+            return False
+        return False
 
-found_any = False
-for m in models:
-    if hasattr(m, "supported_generation_methods") and "generateContent" in m.supported_generation_methods:
-        print("-", m.name)
-        found_any = True
+usable = []
+blocked = []
 
-if not found_any:
-    print("No models with generateContent found. Check your API key / permissions.")
+for m in MODELS_TO_TEST:
+    if can_use(m):
+        usable.append(m)
+    else:
+        blocked.append(m)
+
+print("✅ Usable models:")
+for m in usable:
+    print("-", m)
+
+print("\n❌ Blocked models:")
+for m in blocked:
+    print("-", m)
