@@ -44,7 +44,7 @@ This tool helps with:
 ---
 
 ## 🏗️ Project Structure
-
+```text
 llm-data-labeling-assistant/
 │
 ├── app.py # Streamlit app entry point
@@ -60,7 +60,7 @@ llm-data-labeling-assistant/
 │ └── sidebar.py # Sidebar UI logic
 │
 └── .gitignore
-
+```
 
 ---
 
